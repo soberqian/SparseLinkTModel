@@ -5,10 +5,10 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.special.Gamma;
 
 /**
- * SparseLinkTopicModel GibbsSampling
+ * Sparse Topic-Level Model--GibbsSampling
  * 
- * @author: qianyang
- * @email qy20115549@126.com
+ * @author: qian yang
+ * @email yqian@mail.hfut.edu.cn
  */
 public class SparseLinkToModel {
 
@@ -24,15 +24,15 @@ public class SparseLinkToModel {
 
 //	double alpha;
 
-	double alpha0 ;  //³¬²ÎÊı alpha0 = 1E-12
+	double alpha0 ;  //è¶…å‚æ•° alpha0 = 1E-12
 
-	double alpha1 ;  //³¬²ÎÊıalpha1 = 0.1
+	double alpha1 ;  //è¶…å‚æ•°alpha1 = 0.1
 
 	double beta;
 
-	double gamma0;  //beta·Ö²¼¶ÔÓ¦µÄ²ÎÊı
+	double gamma0;  //betaåˆ†å¸ƒå¯¹åº”çš„å‚æ•°
 
-	double gamma1; //beta·Ö²¼¶ÔÓ¦µÄ²ÎÊı
+	double gamma1; //betaåˆ†å¸ƒå¯¹åº”çš„å‚æ•°
 
 	double beta_bar;
 
@@ -52,13 +52,13 @@ public class SparseLinkToModel {
 
 	int[] ndsum;
 
-	double pi_a[];  //pi²ÎÊı
+	double pi_a[];  //piå‚æ•°
 
-	boolean a[][]; //ÎÄµµÖ÷ÌâÑ¡ÔñÆ÷
+	boolean a[][]; //æ–‡æ¡£ä¸»é¢˜é€‰æ‹©å™¨
 
-	int a_sum[];  //ÎÄµµÖ÷ÌâµÄ¸öÊı
+	int a_sum[];  //æ–‡æ¡£ä¸»é¢˜çš„ä¸ªæ•°
 
-	JDKRandomGenerator rand; //Ëæ»úÊıÉú³ÉÆ÷
+	JDKRandomGenerator rand; //éšæœºæ•°ç”Ÿæˆå™¨
 
 	int iterations;
 
@@ -69,72 +69,72 @@ public class SparseLinkToModel {
 		this.V = V;
 		this.E = E;
 	}
-	//³õÊ¼»¯²Ù×÷
+	//åˆå§‹åŒ–æ“ä½œ
 	public void initialState() {
 		rand = new JDKRandomGenerator();
 		rand.setSeed(System.currentTimeMillis());
-		//±´Ëş·Ö²¼Éú³É
+		//è´å¡”åˆ†å¸ƒç”Ÿæˆ
 		BetaDistribution betaDist = new BetaDistribution(rand, gamma1 , gamma0);
-		//ÎÄµµ×ÜÊı
+		//æ–‡æ¡£æ€»æ•°
 		int D = documents.length;
-		//ÎÄµµdÖĞÖ÷ÌâkÉú³ÉµÄµ¥´ÊÊıÄ¿
+		//æ–‡æ¡£dä¸­ä¸»é¢˜kç”Ÿæˆçš„å•è¯æ•°ç›®
 		nd = new int[D][K];
-		//ÎÄµµmÊÇ·ñ°üº¬Ö÷Ìâk
+		//æ–‡æ¡£mæ˜¯å¦åŒ…å«ä¸»é¢˜k
 		a = new boolean[D][K]; 
-		//ÎÄµµm°üº¬Ö÷ÌâµÄÊıÁ¿
+		//æ–‡æ¡£måŒ…å«ä¸»é¢˜çš„æ•°é‡
 		a_sum = new int[D]; 
-		//pi²ÎÊı
+		//piå‚æ•°
 		pi_a = new double[D];  
-		//Ã¿ÆªÎÄµµ°üº¬µÄËùÓĞµ¥´Ê×ÜÊı
+		//æ¯ç¯‡æ–‡æ¡£åŒ…å«çš„æ‰€æœ‰å•è¯æ€»æ•°
 		ndsum = new int[D];
-		//Ö÷ÌâkÖĞµ¥´ÊvµÄÊıÄ¿
+		//ä¸»é¢˜kä¸­å•è¯vçš„æ•°ç›®
 		nw = new int[V][K];
-		//Ö÷Ìâk¶ÔÓ¦µÄµ¥´Ê×ÜÊı
+		//ä¸»é¢˜kå¯¹åº”çš„å•è¯æ€»æ•°
 		nwsum = new int[K];
-		//Ö÷ÌâkÖĞ¶ÔÓ¦µÄÊµÌåeµÄÊıÄ¿
+		//ä¸»é¢˜kä¸­å¯¹åº”çš„å®ä½“eçš„æ•°ç›®
 		ne = new int[E][K];
-		//Ö÷ÌâkÖĞÊµÌåµÄ×ÜÊı
+		//ä¸»é¢˜kä¸­å®ä½“çš„æ€»æ•°
 		nesum = new int[K];
-		//Ã¿ÆªÎÄµµµ¥´Ê¶ÔÓ¦µÄÖ÷Ìâ
+		//æ¯ç¯‡æ–‡æ¡£å•è¯å¯¹åº”çš„ä¸»é¢˜
 		z = new int[D][];
-		//Ã¿ÆªÎÄµµ¶ÔÓ¦µÄÊµÌå¶ÔÓ¦µÄÖ÷Ìâ
+		//æ¯ç¯‡æ–‡æ¡£å¯¹åº”çš„å®ä½“å¯¹åº”çš„ä¸»é¢˜
 		z_bar = new int[D][];
-		//¶ÔÃ¿Ò»¸öÎÄµµ³éÈ¡pi£¬Ëæ»ú³éÈ¡Öµ
+		//å¯¹æ¯ä¸€ä¸ªæ–‡æ¡£æŠ½å–piï¼ŒéšæœºæŠ½å–å€¼
 		for (int d = 0; d < D; d++) {
 
 			pi_a[d] = betaDist.sample();
-			//¸Õ¿ªÊ¼³õÊ¼»¯ÎÄµµ°üº¬ËùÓĞÖ÷Ìâ
+			//åˆšå¼€å§‹åˆå§‹åŒ–æ–‡æ¡£åŒ…å«æ‰€æœ‰ä¸»é¢˜
 			for (int k = 0; k < K; k++) {
 				a[d][k] = true;
 			}
-			//ÎÄµµ°üº¬µÄÖ÷ÌâÊıÄ¿×ÜºÍ
+			//æ–‡æ¡£åŒ…å«çš„ä¸»é¢˜æ•°ç›®æ€»å’Œ
 			a_sum[d] = K;
 		}
-		//Ñ­»·Ã¿Ò»ÆªÎÄµµ
+		//å¾ªç¯æ¯ä¸€ç¯‡æ–‡æ¡£
 		for (int d = 0; d < D; d++) {
 
 			// words
 			int Nd = documents[d].length;
 			z[d] = new int[Nd];
-			//Ñ­»·Ã¿Ò»¸öµ¥´Ê
+			//å¾ªç¯æ¯ä¸€ä¸ªå•è¯
 			for (int n = 0; n < Nd; n++) {
-				//Ëæ»ú¸³ÖµÖ÷Ìâ
+				//éšæœºèµ‹å€¼ä¸»é¢˜
 				int topic = (int) (Math.random() * K);
 				z[d][n] = topic;
-				//¸üĞÂÍ³¼Æ
+				//æ›´æ–°ç»Ÿè®¡
 				updateCount(d, topic, documents[d][n], +1);
 			}
 
-			// »ñÈ¡ÎÄµµ¶ÔÓ¦µÄËùÓĞÊµÌå¸öÊı
+			// è·å–æ–‡æ¡£å¯¹åº”çš„æ‰€æœ‰å®ä½“ä¸ªæ•°
 			int Ed = entities[d].length;
-			//ÎÄµµÊµÌå¶ÔÓ¦µÄÖ÷Ìâ
+			//æ–‡æ¡£å®ä½“å¯¹åº”çš„ä¸»é¢˜
 			z_bar[d] = new int[Ed];
-			//Ñ­»·ÎÄµµµÄËùÓĞÊµÌå
+			//å¾ªç¯æ–‡æ¡£çš„æ‰€æœ‰å®ä½“
 			for (int m = 0; m < Ed; m++) {
-				//Ëæ»ú¸³ÖµÖ÷Ìâ
+				//éšæœºèµ‹å€¼ä¸»é¢˜
 				int topic = (int) (Math.random() * K);
 				z_bar[d][m] = topic;
-				//¸üĞÂÍ³¼Æ
+				//æ›´æ–°ç»Ÿè®¡
 				updateEntityCount(d, topic, entities[d][m], +1);
 			}
 
@@ -152,32 +152,32 @@ public class SparseLinkToModel {
 		this.beta = beta;
 		this.beta_bar = beta_bar;
 		this.iterations = iterations;
-		//³õÊ¼»¯--·ÖÅäÖ÷Ìâ
+		//åˆå§‹åŒ–--åˆ†é…ä¸»é¢˜
 		initialState();
-		//³éÑù¸üĞÂ
+		//æŠ½æ ·æ›´æ–°
 		for (int i = 0; i < this.iterations; i++) {
 
 			System.out.println("iteration : " + i);
-			gibbs();  //Ö´ĞĞgibbs²ÉÑù
-			//Ï¡Êè¶È¼ÆËã
+			gibbs();  //æ‰§è¡Œgibbsé‡‡æ ·
+			//ç¨€ç–åº¦è®¡ç®—
 			if(i % 1 == 0) {
-				//³éÈ¡¶şÔª¾ØÕó
+				//æŠ½å–äºŒå…ƒçŸ©é˜µ
 				sampleBinaryAMatrix();
 			}
 		}
 	}
-	//gibbs²ÉÑù
+	//gibbsé‡‡æ ·
 	public void gibbs() {
-		//Ñ­»·ËùÓĞÎÄµµ
+		//å¾ªç¯æ‰€æœ‰æ–‡æ¡£
 		for (int d = 0; d < documents.length; d++) {
-			//Ñ­»·ËùÓĞµ¥´Ê
+			//å¾ªç¯æ‰€æœ‰å•è¯
 			for (int n = 0; n < z[d].length; n++) {
 				//
 				int topic = sampleFullConditional(d, n);
 				z[d][n] = topic;
 
 			}
-			// Ñ­»·ËùÓĞÊµÌå
+			// å¾ªç¯æ‰€æœ‰å®ä½“
 			for (int m = 0; m < z_bar[d].length; m++) {
 
 				int topic = sampleFullConditionalEntity(d, m);
@@ -186,29 +186,29 @@ public class SparseLinkToModel {
 			}
 		}
 	}
-	//³éÈ¡µ¥´ÊµÄÖ÷Ìâ;ÊäÈë²ÎÊıÎªÎÄµµdÒÔ¼°ÎÄµµdÖĞµÄµ¥´Ên
+	//æŠ½å–å•è¯çš„ä¸»é¢˜;è¾“å…¥å‚æ•°ä¸ºæ–‡æ¡£dä»¥åŠæ–‡æ¡£dä¸­çš„å•è¯n
 	int sampleFullConditional(int d, int n) {
-		//»ñÈ¡Ô­¶ÔÓ¦µÄÖ÷Ìâ
+		//è·å–åŸå¯¹åº”çš„ä¸»é¢˜
 		int topic = z[d][n];
-		//¸üĞÂÊıÄ¿,¼õ1
+		//æ›´æ–°æ•°ç›®,å‡1
 		updateCount(d, topic, documents[d][n], -1);
-		//¸ÅÂÊ
+		//æ¦‚ç‡
 		double[] p = new double[K];
-		//Ñ­»·Ã¿¸öÖ÷Ìâ
+		//å¾ªç¯æ¯ä¸ªä¸»é¢˜
 		for (int k = 0; k < K; k++) {
 			int x = a[d][k] ? 1 : 0;
 			p[k] = (nd[d][k] + x*alpha1 + alpha0) / (ndsum[d] + K * alpha0) * (nw[documents[d][n]][k] + beta)
 					/ (nwsum[k] + V * beta);
 		}
-		//ÂÖÅÌ¶Ä³éÈ¡ĞÂÖ÷Ìâ
+		//è½®ç›˜èµŒæŠ½å–æ–°ä¸»é¢˜
 		topic = sample(p);
-		//¸üĞÂÍ³¼Æ
+		//æ›´æ–°ç»Ÿè®¡
 		updateCount(d, topic, documents[d][n], +1);
-		//·µ»ØÖ÷Ìâ
+		//è¿”å›ä¸»é¢˜
 		return topic;
 
 	}
-	//³éÈ¡ÊµÌåµÄÖ÷Ìâ
+	//æŠ½å–å®ä½“çš„ä¸»é¢˜
 	int sampleFullConditionalEntity(int d, int m) {
 
 		int topic = z_bar[d][m];
@@ -229,7 +229,7 @@ public class SparseLinkToModel {
 		return topic;
 
 	}
-	//ÂÖÅÌ¶Ä
+	//è½®ç›˜èµŒ
 	int sample(double[] p) {
 
 		int topic = 0;
@@ -246,40 +246,40 @@ public class SparseLinkToModel {
 		return topic;
 	}
 
-	//¸üĞÂÍ³¼Æ
+	//æ›´æ–°ç»Ÿè®¡
 	void updateCount(int d, int topic, int word, int flag) {
-		//ÎÄµµ dÖĞµÄÖ÷Ìâtopic¶ÔÓ¦µÄµ¥´ÊÊıÄ¿¼Ó1
+		//æ–‡æ¡£ dä¸­çš„ä¸»é¢˜topicå¯¹åº”çš„å•è¯æ•°ç›®åŠ 1
 		nd[d][topic] += flag;
-		//ÎÄµµd
+		//æ–‡æ¡£d
 		ndsum[d] += flag;
-		//Ö÷Ìâtopic¶ÔÓ¦µÄµ¥´ÊwordÊıÁ¿¼Ó1
+		//ä¸»é¢˜topicå¯¹åº”çš„å•è¯wordæ•°é‡åŠ 1
 		nw[word][topic] += flag;
-		//Ö÷Ìâtopic¶ÔÓ¦µÄµ¥´Ê×ÜÊı¼Ó1
+		//ä¸»é¢˜topicå¯¹åº”çš„å•è¯æ€»æ•°åŠ 1
 		nwsum[topic] += flag;
 	}
-	//¸üĞÂÍ³¼Æ
+	//æ›´æ–°ç»Ÿè®¡
 	void updateEntityCount(int d, int topic, int entity, int flag) {
-		//Ö÷ÌâtopicÖĞÊµÌåentityµÄÊıÄ¿Ôö¼Ó1
+		//ä¸»é¢˜topicä¸­å®ä½“entityçš„æ•°ç›®å¢åŠ 1
 		ne[entity][topic] += flag;
-		//Ö÷Ìâtopic¶ÔÓ¦µÄ×ÜµÄÊµÌåÊıÄ¿¼Ó1
+		//ä¸»é¢˜topicå¯¹åº”çš„æ€»çš„å®ä½“æ•°ç›®åŠ 1
 		nesum[topic] += flag;
-		//ÎÄµµ dÖĞµÄÖ÷Ìâtopic¶ÔÓ¦µÄµ¥´ÊÊıÄ¿¼Ó1
+		//æ–‡æ¡£ dä¸­çš„ä¸»é¢˜topicå¯¹åº”çš„å•è¯æ•°ç›®åŠ 1
 		nd[d][topic] += flag;
-		//ÎÄµµ¶ÔÓ¦µÄµ¥´ÊÒÔ¼°ÊµÌåµÄ×Ü¸öÊı
+		//æ–‡æ¡£å¯¹åº”çš„å•è¯ä»¥åŠå®ä½“çš„æ€»ä¸ªæ•°
 		ndsum[d] += flag;
 	}
-	//³éÈ¡ÎÄµµÖ÷ÌâÑ¡ÔñÆ÷
+	//æŠ½å–æ–‡æ¡£ä¸»é¢˜é€‰æ‹©å™¨
 	public void sampleBinaryAMatrix() {
 		int GIBBS_ITER = 1;
-		//ÎÄµµÑ¡ÔñÖ÷ÌâµÄ¸öÊı
+		//æ–‡æ¡£é€‰æ‹©ä¸»é¢˜çš„ä¸ªæ•°
 		a_sum = new int[documents.length];
-		//Ñ­»·Ã¿Ò»ÆªÎÄµµ
+		//å¾ªç¯æ¯ä¸€ç¯‡æ–‡æ¡£
 		for (int m = 0; m != documents.length; m++) {
-			//Ñ­»·Ã¿¸öÖ÷Ìâ
+			//å¾ªç¯æ¯ä¸ªä¸»é¢˜
 			for (int k = 0; k != K; k++) {
-				//ÅĞ¶ÏÎÄµµÊÇ·ñÒÑ¾­ÓĞ¸ÃÖ÷ÌâÁË,Èç¹ûÓĞÔòÎªtrue
+				//åˆ¤æ–­æ–‡æ¡£æ˜¯å¦å·²ç»æœ‰è¯¥ä¸»é¢˜äº†,å¦‚æœæœ‰åˆ™ä¸ºtrue
 				a[m][k] = (nd[m][k]) > 0;
-				//ÎÄµµm°üº¬µÄÖ÷Ìâ¸öÊı+1
+				//æ–‡æ¡£måŒ…å«çš„ä¸»é¢˜ä¸ªæ•°+1
 				a_sum[m] += a[m][k] ? 1 : 0;
 			}
 		}
@@ -320,7 +320,7 @@ public class SparseLinkToModel {
 			}
 		}
 	}
-	//¹À¼ÆTheta
+	//ä¼°è®¡Theta
 	public double[][] estimateTheta() {
 		double[][] theta = new double[documents.length][K];
 		for (int d = 0; d < documents.length; d++) {
@@ -331,7 +331,7 @@ public class SparseLinkToModel {
 		}
 		return theta;
 	}
-	//¹À¼ÆPhi
+	//ä¼°è®¡Phi
 	public double[][] estimatePhi() {
 		double[][] phi = new double[K][V];
 		for (int k = 0; k < K; k++) {
@@ -341,7 +341,7 @@ public class SparseLinkToModel {
 		}
 		return phi;
 	}
-	//¹À¼ÆPhiBar
+	//ä¼°è®¡PhiBar
 	public double[][] estimatePhiBar() {
 		double[][] phi_bar = new double[K][E];
 		for (int k = 0; k < K; k++) {
