@@ -19,25 +19,25 @@ public class SLTMVB {
 	int E;
 	int K;
 	//hyperparams
-	double alpha0 ;  //³¬²ÎÊı alpha0 = 0.1
-	double alpha1 ;  //³¬²ÎÊıalpha1 = 1E-12
+	double alpha0 ;  //è¶…å‚æ•° alpha0 = 0.1
+	double alpha1 ;  //è¶…å‚æ•°alpha1 = 1E-12
 	double beta;
-	double epsilon0;  //beta·Ö²¼¶ÔÓ¦µÄ²ÎÊı
-	double epsilon1; //beta·Ö²¼¶ÔÓ¦µÄ²ÎÊı
+	double epsilon0;  //betaåˆ†å¸ƒå¯¹åº”çš„å‚æ•°
+	double epsilon1; //betaåˆ†å¸ƒå¯¹åº”çš„å‚æ•°
 	double beta_bar;
 	//variational parameters
-	double[][] b_mk; //ÎÄµµÖ÷ÌâÑ¡ÔñÆ÷
-	double a_sum[];  //ÎÄµµÖ÷ÌâµÄ¸öÊı(ÆÚÍû)
-	double[][] nmk; //ÎÄµµdÖĞÖ÷ÌâkÉú³ÉµÄµ¥´ÊÊıÄ¿(ÆÚÍû)nmk+cmk
-	double[] nm; //ÎÄµµd°üº¬µÄ´ÊÊıÄ¿(ÆÚÍû)nm+cm
-	double[][] nkw; //Ö÷Ìâk°üº¬µÄµ¥´ÊwµÄÊıÄ¿(ÆÚÍû) K*V
-	double[][] nke; //Ö÷Ìâk°üº¬µÄÊµÌåeµÄÊıÄ¿(ÆÚÍû) K*E
-	double[] nkw_sum; //Ö÷Ìâk°üº¬µÄ×Üµ¥´ÊÊıÄ¿(ÆÚÍû)
-	double[] nke_sum; //Ö÷Ìâk°üº¬µÄ×ÜÊµÌåÊı¾İ(ÆÚÍû)
+	double[][] b_mk; //æ–‡æ¡£ä¸»é¢˜é€‰æ‹©å™¨
+	double a_sum[];  //æ–‡æ¡£ä¸»é¢˜çš„ä¸ªæ•°(æœŸæœ›)
+	double[][] nmk; //æ–‡æ¡£dä¸­ä¸»é¢˜kç”Ÿæˆçš„å•è¯æ•°ç›®(æœŸæœ›)nmk+cmk
+	double[] nm; //æ–‡æ¡£dåŒ…å«çš„è¯æ•°ç›®(æœŸæœ›)nm+cm
+	double[][] nkw; //ä¸»é¢˜kåŒ…å«çš„å•è¯wçš„æ•°ç›®(æœŸæœ›) K*V
+	double[][] nke; //ä¸»é¢˜kåŒ…å«çš„å®ä½“eçš„æ•°ç›®(æœŸæœ›) K*E
+	double[] nkw_sum; //ä¸»é¢˜kåŒ…å«çš„æ€»å•è¯æ•°ç›®(æœŸæœ›)
+	double[] nke_sum; //ä¸»é¢˜kåŒ…å«çš„æ€»å®ä½“æ•°æ®(æœŸæœ›)
 	double[][][] gamma_word; 
 	double[][][] gamma_entity; 
-	JDKRandomGenerator rand; //Ëæ»úÊıÉú³ÉÆ÷
-	int iterations;  //µü´ú´ÎÊı
+	JDKRandomGenerator rand; //éšæœºæ•°ç”Ÿæˆå™¨
+	int iterations;  //è¿­ä»£æ¬¡æ•°
 	public SLTMVB(int[][] documents, int[][] entities, int V, int E) {
 
 		this.documents = documents;
@@ -45,13 +45,13 @@ public class SLTMVB {
 		this.V = V;
 		this.E = E;
 	}
-	//³õÊ¼»¯
+	//åˆå§‹åŒ–
 	public void initialState() {
 		rand = new JDKRandomGenerator();
 		rand.setSeed(System.currentTimeMillis());
-		//±´Ëş·Ö²¼Éú³É
+		//è´å¡”åˆ†å¸ƒç”Ÿæˆ
 		BetaDistribution betaDist = new BetaDistribution(rand, epsilon1 , epsilon0);
-		//ÎÄµµ×ÜÊı
+		//æ–‡æ¡£æ€»æ•°
 		int D = documents.length;
 		//variational parameters
 		b_mk = new double[D][K];
@@ -64,16 +64,16 @@ public class SLTMVB {
 		nke_sum = new double[K];
 		gamma_word = new double[D][][]; 
 		gamma_entity = new double[D][][]; 
-		//Ñ­»·Ã¿ÆªÎÄµµ
+		//å¾ªç¯æ¯ç¯‡æ–‡æ¡£
 		for (int d = 0; d < D; d++) {
-			// ÎÄµµµ¥´Ê×ÜÊı
+			// æ–‡æ¡£å•è¯æ€»æ•°
 			int Nd = documents[d].length;
-			//ÎÄµµÊµÌå×ÜÊı
+			//æ–‡æ¡£å®ä½“æ€»æ•°
 			int Ed = entities[d].length;
 			gamma_word[d] = new double[Nd][K];
 			gamma_entity[d] = new double[Ed][K];
 		}
-		//Ëæ»ú³õÊ¼»¯
+		//éšæœºåˆå§‹åŒ–
 		for(int d = 0; d < D; d ++) {
 			double[] theta;
 			theta = Sampler.getDirichletSample(K, 0.1);
@@ -133,7 +133,7 @@ public class SLTMVB {
 		System.out.println("initial over......");
 		for (int i = 0; i < this.iterations; i++) {
 			System.out.println("iteration.................... " + i);
-			iterateCVB0Update();  //Ö´ĞĞ±ä·ÖÍÆ¶Ï
+			iterateCVB0Update();  //æ‰§è¡Œå˜åˆ†æ¨æ–­
 		}
 	}
 	public void iterateCVB0Update(){
@@ -143,11 +143,12 @@ public class SLTMVB {
 			double[] prev_b = new double[K];
 			for(int k = 0; k < K; k ++) {
 				prev_b[k] = b_mk[d][k];
-				double log_b1 = logOn2(epsilon0 + count_Am(d,k)) + 
-						logOn2Gamma(nmk[d][k] + alpha0 + alpha1) + log2betaf(alpha0 + alpha0*count_Am(d,k) + K*alpha1, nm[d] + alpha0*count_Am(d,k) + K*alpha1);
-				double log_b0 = logOn2(epsilon1 + K - 1.0 - count_Am(d,k)) +
-						logOn2Gamma(alpha0 + alpha1) + log2betaf(alpha0*count_Am(d,k) + K*alpha1, nm[d] + alpha0*count_Am(d,k) + alpha0 + K*alpha1);
-				if (exponential2(log_b1) > 1024) {
+				double am = count_Am(d,k);
+				double log_b1 = logOn2(epsilon0 + am) + 
+						logOn2Gamma(nmk[d][k] + alpha0 + alpha1) + log2betaf(alpha0 + alpha0*am + K*alpha1, nm[d] + alpha0*am + K*alpha1);
+				double log_b0 = logOn2(epsilon1 + K - 1.0 - am) +
+						logOn2Gamma(alpha0 + alpha1) + log2betaf(alpha0*am + K*alpha1, nm[d] + alpha0*am + alpha0 + K*alpha1);
+				if (exponential2(log_b1)>1024) {
 					b_mk[d][k] = Double.MAX_VALUE/(Double.MAX_VALUE + exponential2(log_b0));
 				}else {
 					b_mk[d][k] = exponential2(log_b1)/(exponential2(log_b1) + exponential2(log_b0));
@@ -198,7 +199,7 @@ public class SLTMVB {
 			}
 		}
 	}
-	//Ïà¹Ø¶ÔÊı²Ù×÷
+	//ç›¸å…³å¯¹æ•°æ“ä½œ
 	private static double logOn2Gamma(double value) {
 		return com.aliasi.util.Math.log2Gamma(value);
 	}
@@ -212,7 +213,7 @@ public class SLTMVB {
 	public static double exponential2(double a){
 		return java.lang.Math.pow(2.0, a);
 	}
-	//a_sumÍ³¼Æ
+	//a_sumç»Ÿè®¡
 	private double count_Am(int d, int k) {
 		return a_sum[d] - b_mk[d][k];
 	}
@@ -233,7 +234,7 @@ public class SLTMVB {
 			return nmk[doc][k] - gamma_entity[ex_d][ex_n][k];
 	}
 	
-	//¹À¼ÆTheta
+	//ä¼°è®¡Theta
 	public double[][] estimateTheta() {
 		double[][] theta = new double[documents.length][K];
 		for (int d = 0; d < documents.length; d++) {
@@ -243,7 +244,7 @@ public class SLTMVB {
 		}
 		return theta;
 	}
-	//¹À¼ÆPhi
+	//ä¼°è®¡Phi
 	public double[][] estimatePhi() {
 		double[][] phi = new double[K][V];
 		for (int k = 0; k < K; k++) {
@@ -253,7 +254,7 @@ public class SLTMVB {
 		}
 		return phi;
 	}
-	//¹À¼ÆPhiBar
+	//ä¼°è®¡PhiBar
 	public double[][] estimatePhiBar() {
 		double[][] phi_bar = new double[K][E];
 		for (int k = 0; k < K; k++) {
